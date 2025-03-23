@@ -31,6 +31,7 @@ export class AuthService {
     );
 
     await this.saveToken(response.accessToken);
+    redirect("/");
   }
 
   async logout() {
@@ -41,15 +42,12 @@ export class AuthService {
 
   async getUser() {
     const cookieHandle = await cookies();
-    const token = cookieHandle.get("token");
-    console.log("token", token);
-    if (!token) {
-      redirect("/login");
-    }
+    const token = cookieHandle.get("token")!.value;
+
     try {
       const user = await this.apiService.get("/auth/me", {
         schema: z.object({
-          id: z.string(),
+          id: z.number(),
           username: z.string(),
           email: z.string(),
           firstName: z.string(),

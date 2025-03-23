@@ -8,10 +8,6 @@ export default async function Home() {
   const authService = new AuthService();
   const user = await authService.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
   const { result, error } = await tryCatchAsync(() =>
     new ApiService().get("/products", {
       schema: z.object({
@@ -35,6 +31,7 @@ export default async function Home() {
 
   return (
     <div>
+      <h1>Welcome {user.username}</h1>
       {result.products.map((product) => (
         <div key={product.id}>
           <h1>{product.title}</h1>
