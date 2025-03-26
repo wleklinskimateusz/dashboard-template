@@ -28,7 +28,7 @@ export class ApiService {
           throw new UnauthorizedError(await response.text());
         } else if (response.status === 404) {
           throw new NotFoundError(await response.text());
-        } else if (response.status === 400) {
+        } else if (response.status < 500) {
           throw new BadRequestError(await response.text());
         }
         throw new InternalServerError(await response.text());
