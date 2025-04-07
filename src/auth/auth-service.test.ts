@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { AuthService, NoTokenFound } from "./auth-service";
 import { cookies } from "next/headers";
 import {
