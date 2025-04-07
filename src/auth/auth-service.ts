@@ -2,6 +2,7 @@ import { ApiService, UnauthorizedError } from "@/server/api-service";
 import { z } from "zod";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { tryCatchAsync } from "@/lib/try-catch";
 
 export class AuthService {
   apiService: ApiService;
@@ -42,10 +43,14 @@ export class AuthService {
 
   async getUser() {
     const cookieHandle = await cookies();
-    const token = cookieHandle.get("token")!.value;
+    const token = cookieHandle.get("token")?.value;
 
-    try {
-      const user = await this.apiService.get("/auth/me", {
+    if (!token) {
+      throw new NoTokenFound();
+    }
+
+    const { result: user, error } = await tryCatchAsync(() =>
+      this.apiService.get("/auth/me", {
         schema: z.object({
           id: z.number(),
           username: z.string(),
@@ -58,13 +63,23 @@ export class AuthService {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-      return user;
-    } catch (error) {
+      })
+    );
+
+    if (error) {
       if (error instanceof UnauthorizedError) {
         redirect("/logout");
       }
       throw error;
     }
+
+    return user;
+  }
+}
+
+export class NoTokenFound extends Error {
+  constructor() {
+    super("No token found");
+    this.name = "NoTokenFound";
   }
 }
