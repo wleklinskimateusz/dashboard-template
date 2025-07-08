@@ -5,7 +5,7 @@ import {
   ResponseCookies,
 } from "next/dist/compiled/@edge-runtime/cookies";
 import { redirect } from "next/navigation";
-import { UnauthorizedError } from "@/server/api-service";
+import { NotFoundError, UnauthorizedError } from "@/server/api-service";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
@@ -151,10 +151,30 @@ describe("AuthService", () => {
         value: "test",
       });
 
-      mockFetch.mockRejectedValue(new UnauthorizedError());
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        text: () => Promise.resolve("Unauthorized"),
+      });
 
       await expect(authService.getUser()).rejects.toThrow(UnauthorizedError);
       expect(mockRedirect).toHaveBeenCalledWith("/logout");
+    });
+
+    it("should throw an error if the user is not found", async () => {
+      const authService = new AuthService();
+
+      mockGetCookies.mockReturnValue({
+        value: "test",
+      });
+
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: () => Promise.resolve("Not found"),
+      });
+
+      await expect(authService.getUser()).rejects.toThrow(NotFoundError);
     });
   });
 });

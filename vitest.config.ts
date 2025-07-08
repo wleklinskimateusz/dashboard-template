@@ -11,7 +11,7 @@ export default defineConfig({
     globals: true,
 
     coverage: {
-      provider: "v8",
+      provider: "istanbul",
       exclude: [
         "coverage/**",
         "dist/**",
